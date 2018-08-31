@@ -6,10 +6,21 @@ import time
 import sys
 
 sub = "https://api.coinmarketcap.com/v2/ticker/1984/"
+btc = "https://api.coinmarketcap.com/v2/ticker/1/"
+eth = "https://api.coinmarketcap.com/v2/ticker/1027/"
 update = 5
-price = 0
-oldPrice = 0
-diffPrice = 0
+priceSUB = 0
+priceAMP = 0
+priceBTC = 0
+priceETH = 0
+oldPriceSUB = 0
+oldPriceAMP = 0
+oldPriceBTC = 0
+oldPriceETH = 0
+diffPriceSUB = 0
+diffPriceAMP = 0
+diffPriceBTC = 0
+diffPriceETH = 0
 goldenTime = 0
 
 
@@ -23,15 +34,66 @@ def getSUB():
 	currPrice = getAPI(sub)['data']['quotes']['USD']['price']
 	currPriceFormat = "{0:.4f}".format(currPrice)
 	return currPriceFormat	
+
+def getBTC():
+	currPrice = getAPI(btc)['data']['quotes']['USD']['price']
+	currPriceFormat = "{0:.4f}".format(currPrice)
+	return currPriceFormat	
+
+def getETH():
+	currPrice = getAPI(eth)['data']['quotes']['USD']['price']
+	currPriceFormat = "{0:.4f}".format(currPrice)
+	return currPriceFormat	
 	
 def updatePrice():
-	global price
-	global oldPrice
-	global diffPrice
-	if oldPrice != price:
-		diffPrice = "{0:.4f}".format(float(price)-float(oldPrice))
-		oldPrice = price
-	price = getSUB()
+	global priceSUB
+	global priceAMP
+	global priceBTC
+	global priceETH
+	global oldPriceSUB
+	global oldPriceAMP
+	global oldPriceBTC
+	global oldPriceETH
+	global diffPriceSUB
+	global diffPriceAMP
+	global diffPriceBTC
+	global diffPriceETH
+	if oldPriceSUB != priceSUB:
+		diffPriceSUB = "{0:.4f}".format(float(priceSUB)-float(oldPriceSUB))
+		oldPriceSUB = priceSUB
+
+	if oldPriceAMP != priceAMP:
+		diffPriceAMP = "{0:.4f}".format(float(priceAMP)-float(oldPriceAMP))
+		oldPriceAMP = priceAMP
+
+	if oldPriceBTC != priceBTC:
+		diffPriceBTC = "{0:.4f}".format(float(priceBTC)-float(oldPriceBTC))
+		oldPriceBTC = priceBTC
+
+	if oldPriceETH != priceETH:
+		diffPriceETH = "{0:.4f}".format(float(priceETH)-float(oldPriceETH))
+		oldPriceETH = priceETH
+
+	priceSUB = getSUB()
+	priceAMP = getSUB()
+	priceBTC = getBTC()
+	priceETH = getETH()
+
+def priceTemplate(gameDisplay,font,currentTime,coinName,price,diffPrice,cw,ch,color):
+	#Draw Header
+	hText = font.render(coinName, 1, color)
+	hTextpos = hText.get_rect(center=(cw,ch-65))
+	gameDisplay.blit(hText, hTextpos)
+
+	##Draw price
+	pText = font.render("$"+str(price), 1, color)
+	pTextpos = pText.get_rect(center=(cw,ch))
+	gameDisplay.blit(pText, pTextpos)
+
+	##Draw difference
+	pText = font.render("("+str(diffPrice)+")", 1, color)
+	pTextpos = pText.get_rect(center=(cw,ch+65))
+	gameDisplay.blit(pText, pTextpos)
 
 def display():
 	global goldenTime
@@ -74,7 +136,9 @@ def display():
 		gameDisplay.blit(clearScreen, (0, 0))
 
 		## Draw Lines
-		#pygame.draw.line(gameDisplay, GREEN, [5, 140], [gameDisplay.get_width()-5,140], 1)
+		pygame.draw.line(gameDisplay, GREEN, [0, gameDisplay.get_height()*3/4], [gameDisplay.get_width(),gameDisplay.get_height()*3/4], 1)
+		pygame.draw.line(gameDisplay, BLUE, [0, gameDisplay.get_height()*3/8], [gameDisplay.get_width(),gameDisplay.get_height()*3/8], 1)
+		pygame.draw.line(gameDisplay, RED, [gameDisplay.get_width()/2, 0], [gameDisplay.get_width()/2,gameDisplay.get_height()*3/4], 1)
 
 		currentTime = datetime.datetime.time(datetime.datetime.now())
 		calcTime = time.time()
@@ -83,23 +147,26 @@ def display():
 			goldenTime = calcTime
 			updatePrice() 
 
-		font = pygame.font.Font(None, 75)
-		cw = gameDisplay.get_width()/2
-		ch = gameDisplay.get_height()/2
+		font = pygame.font.Font(None, 65)
 
-		#Draw Header
-		hText = font.render("Price of SUB", 1, CYAN)
-		hTextpos = hText.get_rect(center=(cw,ch-65))
-		gameDisplay.blit(hText, hTextpos)
+		cw = gameDisplay.get_width()
+		ch = gameDisplay.get_height()
+		
+		#BTC
+		priceTemplate(gameDisplay,font,currentTime,"BTC",priceBTC,diffPriceBTC,cw/4,ch*3/16, RED)
 
-		##Draw price
-		pText = font.render("$"+str(price)+" ("+str(diffPrice)+")", 1, CYAN)
-		pTextpos = pText.get_rect(center=(cw,ch))
-		gameDisplay.blit(pText, pTextpos)
+		#ETH
+		priceTemplate(gameDisplay,font,currentTime,"ETH",priceETH,diffPriceETH,cw*3/4,ch*3/16, GREEN)
 
-		##Draw Time		
+		#SUB
+		priceTemplate(gameDisplay,font,currentTime,"SUB",priceSUB,diffPriceSUB,cw/4,ch*9/16, BLUE)
+
+		#AMPLIFY
+		priceTemplate(gameDisplay,font,currentTime,"AMPLIFY",priceAMP,diffPriceAMP,cw*3/4,ch*9/16, CYAN)
+
+		#TIME
 		text = font.render(currentTime.strftime("%I:%M %p"), 1, CYAN)
-		textpos = text.get_rect(center=(cw,ch+65))
+		textpos = text.get_rect(center=(cw/2,ch*7/8))
 		gameDisplay.blit(text, textpos)
 
 		##Update the screen
