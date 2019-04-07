@@ -8,6 +8,7 @@ import sys
 sub = "https://api.coinmarketcap.com/v2/ticker/1984/"
 btc = "https://api.coinmarketcap.com/v2/ticker/1/"
 eth = "https://api.coinmarketcap.com/v2/ticker/1027/"
+#test = "http://sandbox-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id=1984,1,1027"
 update = 5
 priceSUB = 0
 priceAMP = 0
@@ -25,6 +26,7 @@ goldenTime = 0
 
 
 def getAPI(api):
+	#res = requests.get(api,headers={'X-CMC_PRO_API_KEY': ''})
 	res = requests.get(api)
 	res.raise_for_status()
 	data = res.json()
@@ -175,3 +177,5 @@ def display():
 		pygame.display.update()
 
 display()
+
+#print(getAPI(test))
